@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { ArrowLeft, Trophy, Users, Star, Link as LinkIcon, Info, Phone, Award, MapPin } from 'lucide-react'
+import { ArrowLeft, Trophy, Users, Star, Link as LinkIcon, Info, Phone, MapPin } from 'lucide-react'
 
 interface Message {
   id: number
@@ -19,7 +19,6 @@ interface ModalProps {
 
 function Modal({ isOpen, onClose, title, children }: ModalProps) {
   if (!isOpen) return null
-
   return (
     <div className="fixed inset-0 bg-black/80 flex items-end justify-center z-50" onClick={onClose}>
       <div 
@@ -39,11 +38,9 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
 export default function Pub2FranceFullBot() {
   const [view, setView] = useState<'menu' | 'chat'>('menu')
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "Bienvenue sur PUB2FRANCE !", isBot: true, time: "17:20" },
+    { id: 1, text: "Bienvenue sur PUB2FRANCE !", isBot: true, time: "17:30" },
   ])
   const [input, setInput] = useState("")
-
-  // Modals state
   const [activeModal, setActiveModal] = useState<string | null>(null)
 
   const openModal = (modal: string) => setActiveModal(modal)
@@ -123,10 +120,7 @@ export default function Pub2FranceFullBot() {
               </div>
             </div>
 
-            <button 
-              onClick={() => openModal('certificats')}
-              className="w-full bg-[#2a2a2e] py-3 rounded-2xl flex items-center justify-center gap-2 mb-6"
-            >
+            <button onClick={() => openModal('certificats')} className="w-full bg-[#2a2a2e] py-3 rounded-2xl flex items-center justify-center gap-2 mb-6">
               <Trophy className="w-4 h-4" /> Voir les certificats
             </button>
           </div>
@@ -159,3 +153,61 @@ export default function Pub2FranceFullBot() {
             ))}
           </div>
 
+          <div className="p-4 bg-[#1c1c1e] flex gap-2">
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && sendMessage()}
+              placeholder="Message"
+              className="flex-1 bg-[#2a2a2e] rounded-full px-5 py-3 text-sm outline-none"
+            />
+            <button onClick={sendMessage} className="bg-[#3e6757] px-6 rounded-full">↑</button>
+          </div>
+        </div>
+      )}
+
+      {/* MODALES */}
+      <Modal isOpen={activeModal === 'certificats'} onClose={closeModal} title="Certificats">
+        <div className="space-y-3">
+          <div className="bg-[#2a2a2e] p-4 rounded-xl">Côté Quartier studio - Île-de-France ★1</div>
+          <div className="bg-[#2a2a2e] p-4 rounded-xl">La PEUFRA - Grand Est ★1</div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'classement'} onClose={closeModal} title="Classement">
+        <div className="space-y-2">
+          <div className="bg-[#2a2a2e] p-3 rounded-xl">1. Côté Quartier studio - 1 vote</div>
+          <div className="bg-[#2a2a2e] p-3 rounded-xl">2. La PEUFRA - 1 vote</div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'liens'} onClose={closeModal} title="Liens Officiels">
+        <div className="space-y-2 text-sm">
+          <div>🔴 Scam Alert</div>
+          <div>🌍 Actu Monde</div>
+          <div>💬 Chat</div>
+          <div>📋 Certificats</div>
+          <div>📷 Instagram</div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'infos'} onClose={closeModal} title="Infos">
+        <div>
+          <p>Équipe spécialisée charbons</p>
+          <p className="mt-2">Qualité • Référence</p>
+          <p className="text-red-400 mt-3">⚠️ Attention aux scams</p>
+        </div>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'profil'} onClose={closeModal} title="Mon Profil">
+        <div className="space-y-2 text-sm">
+          <div>🆔 ID: 870325...</div>
+          <div>📍 Nouvelle-Aquitaine</div>
+          <div>⭐ 0 favoris</div>
+          <div>🔌 0 plugs région</div>
+        </div>
+      </Modal>
+
+    </div>
+  )
+}
