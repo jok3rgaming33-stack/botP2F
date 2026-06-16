@@ -38,7 +38,7 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
 export default function Pub2FranceFullBot() {
   const [view, setView] = useState<'menu' | 'chat'>('menu')
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "Bienvenue sur PUB2FRANCE !", isBot: true, time: "17:30" },
+    { id: 1, text: "Bienvenue sur PUB2FRANCE !", isBot: true, time: "17:32" },
   ])
   const [input, setInput] = useState("")
   const [activeModal, setActiveModal] = useState<string | null>(null)
@@ -166,7 +166,9 @@ export default function Pub2FranceFullBot() {
         </div>
       )}
 
-      {/* MODALES */}
+      {/* ==================== MODALES ==================== */}
+
+      {/* Certificats */}
       <Modal isOpen={activeModal === 'certificats'} onClose={closeModal} title="Certificats">
         <div className="space-y-3">
           <div className="bg-[#2a2a2e] p-4 rounded-xl">Côté Quartier studio - Île-de-France ★1</div>
@@ -174,37 +176,98 @@ export default function Pub2FranceFullBot() {
         </div>
       </Modal>
 
+      {/* Classement */}
       <Modal isOpen={activeModal === 'classement'} onClose={closeModal} title="Classement">
         <div className="space-y-2">
-          <div className="bg-[#2a2a2e] p-3 rounded-xl">1. Côté Quartier studio - 1 vote</div>
-          <div className="bg-[#2a2a2e] p-3 rounded-xl">2. La PEUFRA - 1 vote</div>
+          <div className="bg-[#2a2a2e] p-3 rounded-xl flex justify-between">
+            <span>1. Côté Quartier studio</span> <span>1 vote</span>
+          </div>
+          <div className="bg-[#2a2a2e] p-3 rounded-xl flex justify-between">
+            <span>2. La PEUFRA</span> <span>1 vote</span>
+          </div>
         </div>
       </Modal>
 
+      {/* Liens */}
       <Modal isOpen={activeModal === 'liens'} onClose={closeModal} title="Liens Officiels">
-        <div className="space-y-2 text-sm">
-          <div>🔴 Scam Alert</div>
-          <div>🌍 Actu Monde</div>
-          <div>💬 Chat</div>
-          <div>📋 Certificats</div>
-          <div>📷 Instagram</div>
+        <div className="space-y-3 text-sm">
+          <div className="flex items-center gap-3">🔴 Scam Alert</div>
+          <div className="flex items-center gap-3">🌍 Actu Monde</div>
+          <div className="flex items-center gap-3">💬 Chat</div>
+          <div className="flex items-center gap-3">📋 Certificats</div>
+          <div className="flex items-center gap-3">📷 Instagram</div>
         </div>
       </Modal>
 
+      {/* Infos */}
       <Modal isOpen={activeModal === 'infos'} onClose={closeModal} title="Infos">
-        <div>
+        <div className="space-y-3 text-sm">
           <p>Équipe spécialisée charbons</p>
-          <p className="mt-2">Qualité • Référence</p>
-          <p className="text-red-400 mt-3">⚠️ Attention aux scams</p>
+          <p>Qualité • Référence</p>
+          <p className="text-red-400 mt-4">⚠️ Attention aux scams</p>
+          <p className="mt-2">🔥 Jamais égales</p>
         </div>
       </Modal>
 
+      {/* Profil */}
       <Modal isOpen={activeModal === 'profil'} onClose={closeModal} title="Mon Profil">
-        <div className="space-y-2 text-sm">
+        <div className="space-y-3 text-sm">
           <div>🆔 ID: 870325...</div>
           <div>📍 Nouvelle-Aquitaine</div>
           <div>⭐ 0 favoris</div>
           <div>🔌 0 plugs région</div>
+          <button className="mt-4 w-full bg-[#2a2a2e] py-2 rounded-xl">Changer de région</button>
+        </div>
+      </Modal>
+
+      {/* Plugs */}
+      <Modal isOpen={activeModal === 'plugs'} onClose={closeModal} title="Tous les Plugs">
+        <div className="space-y-2 text-sm">
+          <div className="bg-[#2a2a2e] p-3 rounded-xl">Côté Quartier studio - Île-de-France</div>
+          <div className="bg-[#2a2a2e] p-3 rounded-xl">La PEUFRA - Grand Est</div>
+          <div className="bg-[#2a2a2e] p-3 rounded-xl">+ d'autres plugs...</div>
+        </div>
+      </Modal>
+
+      {/* Région */}
+      <Modal isOpen={activeModal === 'region'} onClose={closeModal} title="Ma Région">
+        <div>
+          <p className="mb-3">Tu es actuellement en : <strong>Nouvelle-Aquitaine</strong></p>
+          <button className="w-full bg-[#2a2a2e] py-2 rounded-xl">Changer de région</button>
+        </div>
+      </Modal>
+
+      {/* Rechercher */}
+      <Modal isOpen={activeModal === 'search'} onClose={closeModal} title="Rechercher">
+        <input 
+          type="text" 
+          placeholder="Rechercher un plug..." 
+          className="w-full bg-[#2a2a2e] rounded-xl px-4 py-3 text-sm outline-none" 
+        />
+        <p className="text-xs text-white/50 mt-3">Fonctionnalité à venir...</p>
+      </Modal>
+
+      {/* Favoris */}
+      <Modal isOpen={activeModal === 'favoris'} onClose={closeModal} title="Mes Favoris">
+        <div className="text-center py-6 text-white/60">
+          ⭐ Aucun favori pour le moment
+        </div>
+      </Modal>
+
+      {/* Mini App */}
+      <Modal isOpen={activeModal === 'miniapp'} onClose={closeModal} title="Mini App">
+        <div className="text-center py-8">
+          <p className="mb-4">Mini Application en cours de développement</p>
+          <div className="text-4xl">📱</div>
+        </div>
+      </Modal>
+
+      {/* Contact */}
+      <Modal isOpen={activeModal === 'contact'} onClose={closeModal} title="Contact">
+        <div className="space-y-3 text-sm">
+          <div>📧 Contact : @tonpseudo</div>
+          <div>🤖 Bot : @PUB2FRANCE_BOT</div>
+          <div className="pt-4 text-white/60 text-xs">Réponse sous 24h en moyenne</div>
         </div>
       </Modal>
 
