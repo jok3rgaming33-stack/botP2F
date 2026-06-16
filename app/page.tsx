@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Trophy, Users, Star, Link as LinkIcon, Info, Phone, MapPin } from 'lucide-react'
+import { ArrowLeft, Trophy, Users, Star, Link as LinkIcon, Info, Phone, MapPin, Search, Award } from 'lucide-react'
 
 interface Message {
   id: number
@@ -29,12 +29,12 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
     <div className="fixed inset-0 bg-black/80 flex items-end justify-center z-50" onClick={onClose}>
       <div 
-        className="bg-[#1c1c1e] w-full max-w-[420px] rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto"
+        className="bg-[#1c1c1e] w-full max-w-[420px] rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button onClick={onClose} className="text-2xl leading-none">×</button>
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="text-xl font-semibold">{title}</h3>
+          <button onClick={onClose} className="text-3xl leading-none text-white/60 hover:text-white">×</button>
         </div>
         <div>{children}</div>
       </div>
@@ -42,33 +42,66 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
   )
 }
 
-// Toast Component
 function Toast({ message, show }: { message: string; show: boolean }) {
   if (!show) return null
   return (
-    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#2a2a2e] text-white px-5 py-2 rounded-full text-sm shadow-lg z-[60]">
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-[#2a2a2e] text-white px-6 py-2.5 rounded-full text-sm shadow-xl z-[60]">
       {message}
     </div>
   )
 }
 
-export default function Pub2FranceWithFavorites() {
+export default function Pub2FranceWithVoting() {
   const [view, setView] = useState<'menu' | 'chat'>('menu')
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "Bienvenue sur PUB2FRANCE !", isBot: true, time: "17:38" },
+    { id: 1, text: "Bienvenue sur PUB2FRANCE !", isBot: true, time: "17:53" },
   ])
   const [input, setInput] = useState("")
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [toast, setToast] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
 
   // === FAVORIS ===
   const [favorites, setFavorites] = useState<number[]>([])
 
+  // === VOTES (nouveau) ===
+  const [votes, setVotes] = useState<Record<number, number>>({})
+
+  // Charger favoris + votes depuis localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('pub2france_favorites')
-    if (saved) setFavorites(JSON.parse(saved))
+    const savedFavorites = localStorage.getItem('pub2france_favorites')
+    if (savedFavorites) setFavorites(JSON.parse(savedFavorites))
+
+    const savedVotes = localStorage.getItem('pub2france_votes')
+    if (savedVotes) setVotes(JSON.parse(savedVotes))
   }, [])
 
+  // Sauvegarder les votes
+  const saveVotes = (newVotes: Record<number, number>) => {
+    setVotes(newVotes)
+    localStorage.setItem('pub2france_votes', JSON.stringify(newVotes))
+  }
+
+  // Voter pour un plug
+  const voteForPlug = (plugId: number, plugName: string) => {
+    const newVotes = { ...votes }
+    newVotes[plugId] = (newVotes[plugId] || 0) + 1
+    
+    saveVotes(newVotes)
+    
+    setToast(`+1 vote pour ${plugName} !`)
+    setTimeout(() => setToast(""), 1800)
+  }
+
+  // Liste des plugs avec votes dynamiques
+  const plugs: Plug[] = [
+    { id: 1, name: "Côté Quartier studio", region: "Île-de-France", votes: votes[1] || 0 },
+    { id: 2, name: "La PEUFRA", region: "Grand Est", votes: votes[2] || 0 },
+    { id: 3, name: "Plug Bordeaux Centre", region: "Nouvelle-Aquitaine", votes: votes[3] || 0 },
+    { id: 4, name: "Plug Toulouse Sud", region: "Occitanie", votes: votes[4] || 0 },
+  ]
+
+  // === FAVORIS (même logique que avant) ===
   const toggleFavorite = (plugId: number, plugName: string) => {
     let newFavorites: number[]
     let message = ""
@@ -83,23 +116,26 @@ export default function Pub2FranceWithFavorites() {
 
     setFavorites(newFavorites)
     localStorage.setItem('pub2france_favorites', JSON.stringify(newFavorites))
-
-    // Afficher le toast
     setToast(message)
     setTimeout(() => setToast(""), 1800)
   }
 
   const isFavorite = (plugId: number) => favorites.includes(plugId)
 
-  // Liste des plugs
-  const plugs: Plug[] = [
-    { id: 1, name: "Côté Quartier studio", region: "Île-de-France", votes: 1 },
-    { id: 2, name: "La PEUFRA", region: "Grand Est", votes: 1 },
-    { id: 3, name: "Plug Bordeaux Centre", region: "Nouvelle-Aquitaine", votes: 0 },
-  ]
+  // Recherche
+  const filteredPlugs = plugs.filter(plug =>
+    plug.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    plug.region.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  const openModal = (modal: string) => setActiveModal(modal)
-  const closeModal = () => setActiveModal(null)
+  const openModal = (modal: string) => {
+    setActiveModal(modal)
+    if (modal !== 'search') setSearchTerm("")
+  }
+  const closeModal = () => {
+    setActiveModal(null)
+    setSearchTerm("")
+  }
 
   const sendMessage = () => {
     if (!input.trim()) return
@@ -125,7 +161,7 @@ export default function Pub2FranceWithFavorites() {
   const menuItems = [
     { icon: <Users className="w-5 h-5" />, label: "Tous les plugs", modal: "plugs" },
     { icon: <MapPin className="w-5 h-5" />, label: "Ma région", modal: "region" },
-    { icon: "🔍", label: "Rechercher", modal: "search" },
+    { icon: <Search className="w-5 h-5" />, label: "Rechercher", modal: "search" },
     { icon: <Trophy className="w-5 h-5" />, label: "Classement", modal: "classement" },
     { icon: <Star className="w-5 h-5" />, label: `Mes favoris (${favorites.length})`, modal: "favoris" },
     { icon: "👤", label: "Mon profil", modal: "profil" },
@@ -218,7 +254,6 @@ export default function Pub2FranceWithFavorites() {
         </div>
       )}
 
-      {/* Toast */}
       <Toast message={toast} show={!!toast} />
 
       {/* ==================== MODALES ==================== */}
@@ -227,14 +262,19 @@ export default function Pub2FranceWithFavorites() {
       <Modal isOpen={activeModal === 'certificats'} onClose={closeModal} title="Certificats">
         <div className="space-y-3">
           {plugs.map(plug => (
-            <div key={plug.id} className="bg-[#2a2a2e] p-4 rounded-xl flex justify-between items-center">
+            <div key={plug.id} className="bg-[#252528] p-4 rounded-2xl flex justify-between items-center">
               <div>
-                <div>{plug.name}</div>
-                <div className="text-xs text-white/60">{plug.region}</div>
+                <div className="font-medium">{plug.name}</div>
+                <div className="text-xs text-white/60">{plug.region} • {plug.votes} votes</div>
               </div>
-              <button onClick={() => toggleFavorite(plug.id, plug.name)}>
-                <Star className={`w-5 h-5 ${isFavorite(plug.id) ? 'fill-yellow-400 text-yellow-400' : 'text-white/60'}`} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => voteForPlug(plug.id, plug.name)} className="bg-[#3e6757] px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                  <Award className="w-4 h-4" /> Voter
+                </button>
+                <button onClick={() => toggleFavorite(plug.id, plug.name)}>
+                  <Star className={`w-5 h-5 ${isFavorite(plug.id) ? 'fill-yellow-400 text-yellow-400' : 'text-white/50'}`} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -244,29 +284,71 @@ export default function Pub2FranceWithFavorites() {
       <Modal isOpen={activeModal === 'classement'} onClose={closeModal} title="Classement">
         <div className="space-y-2">
           {plugs.sort((a, b) => b.votes - a.votes).map((plug, index) => (
-            <div key={plug.id} className="bg-[#2a2a2e] p-3 rounded-xl flex justify-between">
-              <span>{index + 1}. {plug.name}</span>
-              <span>{plug.votes} vote{plug.votes > 1 ? 's' : ''}</span>
+            <div key={plug.id} className="bg-[#252528] p-3.5 rounded-2xl flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-lg w-6">{index + 1}</span>
+                <span>{plug.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-white/70">{plug.votes} votes</span>
+                <button onClick={() => voteForPlug(plug.id, plug.name)} className="bg-[#3e6757] px-2.5 py-1 rounded-full text-xs flex items-center gap-1">
+                  <Award className="w-3.5 h-3.5" /> +1
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+      </Modal>
+
+      {/* Recherche */}
+      <Modal isOpen={activeModal === 'search'} onClose={closeModal} title="Rechercher">
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-3.5 w-4 h-4 text-white/40" />
+            <input
+              type="text"
+              placeholder="Rechercher un plug ou une région..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[#252528] pl-11 pr-4 py-3 rounded-2xl text-sm outline-none placeholder:text-white/40"
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          {filteredPlugs.length > 0 ? (
+            filteredPlugs.map(plug => (
+              <div key={plug.id} className="bg-[#252528] p-4 rounded-2xl flex justify-between items-center">
+                <div>
+                  <div className="font-medium">{plug.name}</div>
+                  <div className="text-xs text-white/60">{plug.region} • {plug.votes} votes</div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => voteForPlug(plug.id, plug.name)} className="bg-[#3e6757] px-3 py-1 rounded-full text-sm">Voter</button>
+                  <button onClick={() => toggleFavorite(plug.id, plug.name)}>
+                    <Star className={`w-5 h-5 ${isFavorite(plug.id) ? 'fill-yellow-400 text-yellow-400' : 'text-white/50'}`} />
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-6 text-white/50">Aucun résultat</div>
+          )}
         </div>
       </Modal>
 
       {/* Mes Favoris */}
       <Modal isOpen={activeModal === 'favoris'} onClose={closeModal} title="Mes Favoris">
         {favorites.length === 0 ? (
-          <div className="text-center py-6 text-white/60">⭐ Aucun favori pour le moment</div>
+          <div className="text-center py-8 text-white/60">⭐ Tu n'as pas encore de favoris</div>
         ) : (
           <div className="space-y-2">
             {plugs.filter(p => favorites.includes(p.id)).map(plug => (
-              <div key={plug.id} className="bg-[#2a2a2e] p-3 rounded-xl flex justify-between items-center">
+              <div key={plug.id} className="bg-[#252528] p-4 rounded-2xl flex justify-between items-center">
                 <div>
                   <div>{plug.name}</div>
-                  <div className="text-xs text-white/60">{plug.region}</div>
+                  <div className="text-xs text-white/60">{plug.region} • {plug.votes} votes</div>
                 </div>
-                <button onClick={() => toggleFavorite(plug.id, plug.name)} className="text-red-400 text-sm">
-                  Retirer
-                </button>
+                <button onClick={() => toggleFavorite(plug.id, plug.name)} className="text-red-400 text-sm">Retirer</button>
               </div>
             ))}
           </div>
@@ -307,35 +389,36 @@ export default function Pub2FranceWithFavorites() {
       <Modal isOpen={activeModal === 'plugs'} onClose={closeModal} title="Tous les Plugs">
         <div className="space-y-3">
           {plugs.map(plug => (
-            <div key={plug.id} className="bg-[#2a2a2e] p-4 rounded-xl flex justify-between items-center">
+            <div key={plug.id} className="bg-[#252528] p-4 rounded-2xl flex justify-between items-center">
               <div>
                 <div className="font-medium">{plug.name}</div>
-                <div className="text-xs text-white/60">{plug.region} • {plug.votes} vote{plug.votes > 1 ? 's' : ''}</div>
+                <div className="text-xs text-white/60">{plug.region} • {plug.votes} votes</div>
               </div>
-              <button onClick={() => toggleFavorite(plug.id, plug.name)}>
-                <Star className={`w-5 h-5 ${isFavorite(plug.id) ? 'fill-yellow-400 text-yellow-400' : 'text-white/60'}`} />
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => voteForPlug(plug.id, plug.name)} className="bg-[#3e6757] px-3 py-1 rounded-full text-sm">Voter</button>
+                <button onClick={() => toggleFavorite(plug.id, plug.name)}>
+                  <Star className={`w-5 h-5 ${isFavorite(plug.id) ? 'fill-yellow-400 text-yellow-400' : 'text-white/50'}`} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
       </Modal>
 
-      {/* Autres modales */}
+      {/* Région */}
       <Modal isOpen={activeModal === 'region'} onClose={closeModal} title="Ma Région">
         <div>
           <p className="mb-4">Tu es actuellement en <strong>Nouvelle-Aquitaine</strong></p>
-          <button className="w-full bg-[#2a2a2e] py-2 rounded-xl">Changer de région</button>
+          <button className="w-full bg-[#252528] py-2.5 rounded-2xl">Changer de région</button>
         </div>
       </Modal>
 
-      <Modal isOpen={activeModal === 'search'} onClose={closeModal} title="Rechercher">
-        <input type="text" placeholder="Rechercher un plug..." className="w-full bg-[#2a2a2e] rounded-xl px-4 py-3 text-sm outline-none" />
-      </Modal>
-
+      {/* Mini App */}
       <Modal isOpen={activeModal === 'miniapp'} onClose={closeModal} title="Mini App">
-        <div className="text-center py-8">Mini Application en cours de développement 📱</div>
+        <div className="text-center py-10">Mini Application en cours de développement 📱</div>
       </Modal>
 
+      {/* Contact */}
       <Modal isOpen={activeModal === 'contact'} onClose={closeModal} title="Contact">
         <div className="space-y-3 text-sm">
           <div>📧 Contact : @tonpseudo</div>
